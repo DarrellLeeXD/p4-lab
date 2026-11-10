@@ -1,0 +1,20 @@
+.github/workflows/evidence.yml
+  s_3ea27f9d4012d4::t_dc873f11f2cc9e 1-21,23-35
+  s_3ea27f9d4012d4::t_9e77b3c3ef781b 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "ec3ad0f212c1bedaad9cd088ab1a223a7474b76f",
+  "prompts": {},
+  "sessions": {
+    "s_3ea27f9d4012d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    }
+  }
+}
