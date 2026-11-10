@@ -27,9 +27,9 @@ sh echo '== s2 tunnel table after change =='
 sh ./p4cli s2 table_dump MyIngress.myTunnel_exact
 sh tc qdisc add dev s1-eth2 root netem delay 10ms
 sh tc qdisc show dev s1-eth2
-h1 python3 send.py 10.40.0.3 "loop" --tunnel 3
-sh echo '== initial switch receive counts =='
+sh echo '== switch receive counts before loop packet =='
 sh grep -c 'Processing packet received' logs/s1.txt logs/s2.txt
+h1 python3 send.py 10.40.0.3 "loop" --tunnel 3
 sh sleep 5
 sh echo '== switch receive counts after 5 seconds =='
 sh grep -c 'Processing packet received' logs/s1.txt logs/s2.txt
@@ -67,9 +67,9 @@ sh ./p4cli s2 table_dump MyIngress.myTunnel_exact
 sh ./p4cli s2 "table_modify MyIngress.myTunnel_exact MyIngress.myTunnel_forward 2 1"
 sh echo '== s2 tunnel table after change =='
 sh ./p4cli s2 table_dump MyIngress.myTunnel_exact
-h1 python3 send.py 10.40.0.3 "bounded" --tunnel 3 --hops 4
-sh echo '== initial switch receive counts =='
+sh echo '== switch receive counts before loop packet =='
 sh grep -c 'Processing packet received' logs/s1.txt logs/s2.txt
+h1 python3 send.py 10.40.0.3 "bounded" --tunnel 3 --hops 4
 sh sleep 5
 sh echo '== switch receive counts after 5 seconds =='
 sh grep -c 'Processing packet received' logs/s1.txt logs/s2.txt
@@ -99,9 +99,9 @@ sh grep -E "parse_myTunnel|parse_ipv4|myTunnel_exact|dst_id" logs/s2.txt | tail 
 sh echo '== s2 tunnel table before loop =='
 sh ./p4cli s2 table_dump MyIngress.myTunnel_exact
 sh ./p4cli s2 "table_modify MyIngress.myTunnel_exact MyIngress.myTunnel_forward 2 1"
-h1 python3 send.py 10.40.0.3 "mixed-loop" --tunnel 3 --hops 4
-sh echo '== initial switch receive counts =='
+sh echo '== switch receive counts before loop packet =='
 sh grep -c 'Processing packet received' logs/s1.txt logs/s2.txt
+h1 python3 send.py 10.40.0.3 "mixed-loop" --tunnel 3 --hops 4
 sh sleep 5
 sh echo '== switch receive counts after 5 seconds =='
 sh grep -c 'Processing packet received' logs/s1.txt logs/s2.txt

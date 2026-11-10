@@ -32,6 +32,7 @@ jobs:
           for file in loop-before delivery loop-after mixed; do
             test -s "assignment/evidence/$file.txt"
           done
+          python3 scripts/check_evidence.py
       - name: Upload experiment evidence
         if: always()
         uses: actions/upload-artifact@v4
