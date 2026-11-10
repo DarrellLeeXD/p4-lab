@@ -1,0 +1,40 @@
+lab/evidence/base.txt
+  s_a7d03123c25ce9::t_7236ecb7fffddb 6,10,28-43,45-48,70,75-79,81-84,92-128,133,139,141
+  s_a7d03123c25ce9::t_c797289f51fa71 1-5,7-9,11-27,44,49-69,71-74,80,85-91,129-132,134-138,140,142
+lab/evidence/parser.txt
+  s_a7d03123c25ce9::t_c797289f51fa71 1-5,7-9,11-23,54-58,60-64,66,68
+  s_a7d03123c25ce9::t_7236ecb7fffddb 6,10,24-53,59,65,67
+lab/NOTES.md
+  s_3ea27f9d4012d4::t_ad72396236bf7c 1-4,6-77
+  s_a7d03123c25ce9::t_7236ecb7fffddb 5
+lab/evidence/table.txt
+  s_a7d03123c25ce9::t_c797289f51fa71 1-5,7-9,11-15,46-50,58-62,64,66
+  s_a7d03123c25ce9::t_7236ecb7fffddb 6,10,16-45,51-57,63,65
+lab/evidence/broken.txt
+  s_a7d03123c25ce9::t_7236ecb7fffddb 7,11,17-46,54,57-59,61,63,69,71
+  s_a7d03123c25ce9::t_c797289f51fa71 1-6,8-10,12-16,47-53,55-56,60,62,64-68,70,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "30d1914e6d76966c3e293b04997a8dc8552acda6",
+  "prompts": {},
+  "sessions": {
+    "s_3ea27f9d4012d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    },
+    "s_a7d03123c25ce9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "unknown"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    }
+  }
+}
