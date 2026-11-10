@@ -10,20 +10,18 @@ esac
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-cp /work/topo.py /work/p4cli /work/s1-commands.txt /work/s2-commands.txt "$work/"
-git -c safe.directory=/work -C /work show origin/main:send.py > "$work/send.py"
-git -c safe.directory=/work -C /work show origin/main:receive.py > "$work/receive.py"
+cp /work/lab/topo.py /work/lab/p4cli /work/lab/s1-commands.txt /work/lab/s2-commands.txt "$work/"
+cp /work/lab/send.py /work/lab/receive.py "$work/"
 
 if [[ $phase == base ]]; then
-  root=$(git -c safe.directory=/work -C /work rev-list --max-parents=0 HEAD)
-  git -c safe.directory=/work -C /work show "$root:tunnel.p4" > "$work/tunnel.p4"
+  cp /work/lab/tunnel_initial.p4 "$work/tunnel.p4"
 else
   python3 - "$phase" "$work/tunnel.p4" <<'PY'
 from pathlib import Path
 import sys
 
 phase, target = sys.argv[1:]
-source = Path('/work/tunnel_v1.p4').read_text()
+source = Path('/work/lab/tunnel.p4').read_text()
 if phase == 'parser':
     old = '''    apply {
         if (hdr.myTunnel.isValid()) {

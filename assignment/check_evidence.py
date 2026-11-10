@@ -6,7 +6,7 @@ import re
 import sys
 
 
-evidence = Path(sys.argv[1] if len(sys.argv) > 1 else "assignment/evidence")
+evidence = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent / "evidence"
 
 
 def counts(phase):

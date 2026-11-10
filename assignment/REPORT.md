@@ -46,7 +46,7 @@ plain IPv4 branch remains separate. `send.py` adds the byte to its Scapy
 `MyTunnel` header, sets a default of 4, and rejects an out-of-range `--hops`
 or `--hops` without `--tunnel`. `receive.py` parses the longer header and
 prints the arriving hop value. `tunnel_v1.p4` retains the complete Step 5
-program for the comparison, and `scripts/collect_evidence.sh` records each
+program for the comparison, and `assignment/collect.sh` records each
 experiment in the course container.
 
 ## 4. Evidence: it works

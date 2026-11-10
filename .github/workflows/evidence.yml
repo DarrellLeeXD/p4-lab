@@ -4,7 +4,18 @@ on:
   push:
     branches: [hop-limit]
     paths:
-      - scripts/collect_evidence.sh
+      - assignment/collect.sh
+      - assignment/tunnel.p4
+      - assignment/tunnel_v1.p4
+      - assignment/send.py
+      - assignment/receive.py
+      - assignment/topo.py
+      - assignment/p4cli
+      - assignment/s1-commands.txt
+      - assignment/s2-commands.txt
+      - assignment/legacy/send.py
+      - assignment/legacy/receive.py
+      - assignment/check_evidence.py
       - .github/workflows/evidence.yml
   workflow_dispatch:
 
@@ -27,12 +38,12 @@ jobs:
             docker run --rm -i --privileged \
               -v "$PWD:/work" -w /work \
               ghcr.io/firdaussahran/p4-lab:1.0 \
-              bash scripts/collect_evidence.sh "$phase"
+              bash assignment/collect.sh "$phase"
           done
           for file in loop-before delivery loop-after mixed; do
             test -s "assignment/evidence/$file.txt"
           done
-          python3 scripts/check_evidence.py
+          python3 assignment/check_evidence.py
       - name: Upload experiment evidence
         if: always()
         uses: actions/upload-artifact@v4

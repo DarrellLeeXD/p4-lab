@@ -20,7 +20,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile tunnel.p4
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p build
           p4c-bm2-ss -o build/tunnel.json tunnel.p4
           echo "tunnel.p4 compiled."
+
+      - name: Check the two runnable folders
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in topo.py p4cli s1-commands.txt s2-commands.txt; do
+            cmp "$file" "lab/$file"
+            cmp "$file" "assignment/$file"
+          done
+          for file in tunnel.p4 tunnel_v1.p4 send.py receive.py; do
+            cmp "$file" "assignment/$file"
+          done
+          cmp tunnel_v1.p4 lab/tunnel.p4
+          (cd lab && mkdir -p build && p4c-bm2-ss -o build/tunnel.json tunnel.p4)
+          (cd assignment && mkdir -p build && p4c-bm2-ss -o build/tunnel.json tunnel.p4)
+          (cd assignment && python3 -m unittest discover -s tests -q)

@@ -24,6 +24,18 @@ python3 topo.py --id NNNN
 That compiles `tunnel.p4`, starts the network, fills the switches' tables and opens the
 `mininet>` prompt. Type `exit` to stop it; run it again after every change to `tunnel.p4`.
 
+## Completed Week 5 work
+
+| Folder | Contents | Run from that folder |
+| --- | --- | --- |
+| [`lab/`](lab/README.md) | Finished Step 5 program, the original template, host scripts, topology, lab notes, and Steps 1–6 evidence | `python3 topo.py --id 4940` |
+| [`assignment/`](assignment/README.md) | Hop-limit program, old program for the mixed rollout, host scripts, tests, report, and C1–C5 evidence | `python3 topo.py --id 4940` |
+
+The root-level files remain the entrypoints expected by the course template and
+GitHub's `Compile tunnel.p4` check. They match the completed assignment files;
+`tunnel_v1.p4` matches `lab/tunnel.p4`. The check also compiles and tests the
+copies in both folders.
+
 ## Assignment
 
 After the lab, the Week 5 assignment continues it: **put a hop limit on the tunnel**. The

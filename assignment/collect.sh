@@ -2,21 +2,21 @@
 # Run one Week 5 observation in the official course image, as root with --privileged.
 set -euo pipefail
 
-phase=${1:?usage: collect_evidence.sh before|delivery|after|mixed}
+phase=${1:?usage: collect.sh before|delivery|after|mixed}
 mkdir -p /work/assignment/evidence
 
 case "$phase" in
   before)
     # Recreate the finished lab version without changing the assignment checkout.
     old_run=$(mktemp -d)
-    cp /work/tunnel_v1.p4 "$old_run/tunnel.p4"
-    cp /work/topo.py /work/p4cli /work/s1-commands.txt /work/s2-commands.txt "$old_run/"
-    git -c safe.directory=/work -C /work show origin/main:send.py > "$old_run/send.py"
-    git -c safe.directory=/work -C /work show origin/main:receive.py > "$old_run/receive.py"
+    cp /work/assignment/tunnel_v1.p4 "$old_run/tunnel.p4"
+    cp /work/assignment/topo.py /work/assignment/p4cli /work/assignment/s1-commands.txt /work/assignment/s2-commands.txt "$old_run/"
+    cp /work/assignment/legacy/send.py "$old_run/send.py"
+    cp /work/assignment/legacy/receive.py "$old_run/receive.py"
     cd "$old_run"
     evidence=/work/assignment/evidence/loop-before.txt
     cat > "$evidence" <<'NOTE'
-Finished lab program on both switches; original four-byte sender/receiver from main.
+Finished lab program on both switches; four-byte sender/receiver from assignment/legacy.
 To keep this deliberately unbounded loop's logs manageable, s1-eth2 has a 10 ms netem delay.
 NOTE
     python3 topo.py --id 4940 <<'MININET' >> "$evidence" 2>&1
@@ -37,8 +37,8 @@ exit
 MININET
     ;;
   delivery)
-    cd /work
-    evidence=assignment/evidence/delivery.txt
+    cd /work/assignment
+    evidence=evidence/delivery.txt
     cat > "$evidence" <<'NOTE'
 Both switches run the new program. Destination IP deliberately differs from tunnel exit.
 NOTE
@@ -57,8 +57,8 @@ exit
 MININET
     ;;
   after)
-    cd /work
-    evidence=assignment/evidence/loop-after.txt
+    cd /work/assignment
+    evidence=evidence/loop-after.txt
     cat > "$evidence" <<'NOTE'
 Both switches run the new program. The same exit-3 loop uses a starting hop limit of 4.
 NOTE
@@ -79,8 +79,8 @@ exit
 MININET
     ;;
   mixed)
-    cd /work
-    evidence=assignment/evidence/mixed.txt
+    cd /work/assignment
+    evidence=evidence/mixed.txt
     cat > "$evidence" <<'NOTE'
 s1 runs the new five-byte program; s2 runs the saved four-byte tunnel_v1.p4.
 The mixed-rollout prediction was committed in assignment/REPORT.md before this run.

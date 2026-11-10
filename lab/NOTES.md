@@ -3,8 +3,9 @@
 Student ID suffix: **4940**. The hosts used `10.40.0.1`–`10.40.0.3`.
 The experiments ran in the course's x86 container through
 [GitHub Actions run 42772978263](https://github.com/DarrellLeeXD/p4-lab/actions/runs/42772978263).
-The script recreated each temporary program state; the finished Step 5 program
-remains committed on `main` and saved as `tunnel_v1.p4` on the assignment branch.
+The script recreated each temporary program state from files in this folder.
+The finished Step 5 program is `lab/tunnel.p4`; the same version remains on
+`main` and is saved as `assignment/tunnel_v1.p4` for the mixed-rollout test.
 
 ## Steps 0–3: the original program
 
