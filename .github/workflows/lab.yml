@@ -1,0 +1,50 @@
+name: Verify Week 5 lab stages
+
+on:
+  push:
+    branches: [hop-limit]
+    paths:
+      - scripts/collect_lab.sh
+      - .github/workflows/lab.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run lab stages in course image
+        shell: bash
+        run: |
+          set -euo pipefail
+          for phase in base parser table broken; do
+            docker run --rm -i --privileged \
+              -v "$PWD:/work" -w /work \
+              ghcr.io/firdaussahran/p4-lab:1.0 \
+              bash scripts/collect_lab.sh "$phase"
+            test -s "lab/evidence/$phase.txt"
+          done
+          grep -q '3 packets transmitted, 3 received' lab/evidence/base.txt
+          grep -q '2 packets transmitted, 0 received' lab/evidence/base.txt
+          grep -q '2 packets transmitted, 2 received' lab/evidence/base.txt
+          grep -q 'key is 1212' lab/evidence/base.txt
+          grep -q "TTL 62: 'test 2'" lab/evidence/parser.txt
+          grep -q "TTL 64: 'test 3'" lab/evidence/table.txt
+          grep -q 'key is 4500' lab/evidence/broken.txt
+          grep -q 'hdr.myTunnel.dst_id : 0022' lab/evidence/broken.txt
+          if grep -q 'Received (' lab/evidence/broken.txt; then
+            echo 'unexpected delivery in broken-deparser stage' >&2
+            exit 1
+          fi
+      - name: Upload lab evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: week5-lab
+          path: lab/evidence/*.txt
