@@ -137,4 +137,14 @@ MININET
     ;;
 esac
 
+# Mininet's PTY uses CRLF and adds trailing spaces; keep the evidence diff-clean.
+python3 - "$evidence" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+lines = path.read_bytes().replace(b'\r\n', b'\n').split(b'\n')
+path.write_bytes(b'\n'.join(line.rstrip(b' \t') for line in lines))
+PY
+
 echo "Collected $phase: $evidence"
