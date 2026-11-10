@@ -1,0 +1,22 @@
+scripts/collect_evidence.sh
+  s_3ea27f9d4012d4::t_915473f1557584 1-13,16-119
+  s_3ea27f9d4012d4::t_79b7470f544756 14-15
+.github/workflows/evidence.yml
+  s_3ea27f9d4012d4::t_915473f1557584 6-8,20-22,26-35,39-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "c586cd113e7c066a6c9c4c7ddb02f752bbe0700d",
+  "prompts": {},
+  "sessions": {
+    "s_3ea27f9d4012d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    }
+  }
+}
