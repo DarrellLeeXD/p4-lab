@@ -1,6 +1,8 @@
 name: Collect tunnel evidence
 
 on:
+  push:
+    branches: [hop-limit]
   workflow_dispatch:
 
 permissions:
