@@ -1,0 +1,84 @@
+assignment/collect.sh
+  s_3ea27f9d4012d4::t_3c15309260e5ec 1-119
+lab/README.md
+  s_3ea27f9d4012d4::t_eb7e7766af6643 1-20
+.github/workflows/lab.yml
+  s_3ea27f9d4012d4::t_3c15309260e5ec 7-15,38
+lab/NOTES.md
+  s_3ea27f9d4012d4::t_eb7e7766af6643 6-8
+.github/workflows/evidence.yml
+  s_3ea27f9d4012d4::t_3c15309260e5ec 7-18,41,46
+assignment/README.md
+  s_3ea27f9d4012d4::t_eb7e7766af6643 1-23
+assignment/legacy/receive.py
+  s_a7d03123c25ce9::t_cc82795fd58095 1-24
+assignment/legacy/send.py
+  s_a7d03123c25ce9::t_cc82795fd58095 1-39
+lab/collect.sh
+  s_3ea27f9d4012d4::t_3c15309260e5ec 1-148
+README.md
+  s_3ea27f9d4012d4::t_eb7e7766af6643 27-38
+assignment/REPORT.md
+  s_3ea27f9d4012d4::t_eb7e7766af6643 49
+lab/receive.py
+  s_a7d03123c25ce9::t_cc82795fd58095 1-24
+lab/send.py
+  s_a7d03123c25ce9::t_cc82795fd58095 1-39
+assignment/check_evidence.py
+  s_3ea27f9d4012d4::t_3c15309260e5ec 1-43
+lab/tunnel_initial.p4
+  s_a7d03123c25ce9::t_34d4162e0cd1a8 1-166
+.github/workflows/compile.yml
+  s_3ea27f9d4012d4::t_a8ca16e39ec472 23,31
+  s_3ea27f9d4012d4::t_b4d264e82049d2 25,29-30,32-44
+assignment/p4cli
+  s_3ea27f9d4012d4::t_9b6c8f50ccd37f 1-11
+assignment/receive.py
+  s_3ea27f9d4012d4::t_689fe993ee8086 1-30
+assignment/s1-commands.txt
+  s_3ea27f9d4012d4::t_564fe5d47b2578 1-8
+assignment/s2-commands.txt
+  s_3ea27f9d4012d4::t_06983bd7e64871 1-8
+assignment/send.py
+  s_3ea27f9d4012d4::t_45e40c8aeb98cb 1-51
+assignment/topo.py
+  s_3ea27f9d4012d4::t_46e0ec18ce0ad9 1-153
+assignment/tunnel.p4
+  s_3ea27f9d4012d4::t_4856a2b6a0c4aa 1-179
+assignment/tunnel_v1.p4
+  s_3ea27f9d4012d4::t_8b606546cf44e3 1-173
+lab/p4cli
+  s_3ea27f9d4012d4::t_281ccc0f7ff6c7 1-11
+lab/s1-commands.txt
+  s_3ea27f9d4012d4::t_c146ca59c095e9 1-8
+lab/s2-commands.txt
+  s_3ea27f9d4012d4::t_b94afd2a6f4f26 1-8
+lab/topo.py
+  s_3ea27f9d4012d4::t_20ecba5a1035d9 1-153
+lab/tunnel.p4
+  s_3ea27f9d4012d4::t_427d7c5a247e81 1-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "6d94414db50681ad3366e1c607be5f6c34d50be2",
+  "prompts": {},
+  "sessions": {
+    "s_3ea27f9d4012d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    },
+    "s_a7d03123c25ce9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "unknown"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    }
+  }
+}
