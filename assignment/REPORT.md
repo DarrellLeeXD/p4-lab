@@ -1,47 +1,69 @@
 # Week 5 assignment — Put a limit on the tunnel
 
-Student ID (last 4 digits only): **4940**
-
-Write each section in your own words, about your own runs. Quote the evidence files in
-`assignment/evidence/` that support each point. Delete the instructions in `<!-- -->` as you go.
+Student ID suffix: **4940**. The Mininet hosts are `10.40.0.1`–`10.40.0.3`.
 
 ## 1. Analysis: the loop
 
-<!-- How did you create the tunnel loop (which entry, on which switch, which commands)?
-     What did the switch logs show over time, with numbers from loop-before.txt?
-     Then look at the IPv4 path in tunnel.p4: it decrements the TTL. Does that stop an IPv4
-     loop in this program? Check the code, and explain what happens when TTL reaches 0. -->
+I started with the finished Step 5 program saved as `tunnel_v1.p4`. On s2,
+`sh ./p4cli s2 table_dump MyIngress.myTunnel_exact` showed that the exit-3
+entry had handle `0x2` and sent to port 3. I changed it with
+`sh ./p4cli s2 "table_modify MyIngress.myTunnel_exact MyIngress.myTunnel_forward 2 1"`.
+Now s1 sends exit 3 to s2, and s2 sends it back to s1. I sent one packet from
+h1 with `--tunnel 3`. In [loop-before.txt](evidence/loop-before.txt), the
+switch receive counters went from **0 to 480 on s1** and **0 to 479 on s2**
+over five seconds. I added 10 ms delay to `s1-eth2` for this deliberately
+unbounded run so the logs would remain manageable; the repeated visits still
+continued until Mininet exited.
+
+The old `ipv4_forward` action subtracts one from the 8-bit IPv4 TTL, but the
+ingress has no zero-TTL drop check. At zero, another subtraction can wrap the
+field to 255. This program therefore does not reliably stop a plain IPv4
+forwarding loop either. More directly, a tunnelled packet takes
+`myTunnel_forward`, which never invokes `ipv4_forward`: the inner IPv4 TTL
+stays at 64 throughout this tunnel loop.
 
 ## 2. Design: the hop limit
 
-I appended an 8-bit `hops` field after `proto_id` and `dst_id`. One byte is
-enough for 0–255 switch forwards and keeps the first four bytes of the old
-header at the same offsets, so the mixed-rollout experiment can show what an
-old switch does with the additional byte. The sender starts at 4 by default:
-the two-switch normal path delivers with 2 left, and a loop can be observed
-briefly without producing an unbounded packet storm. `--hops` allows an
-explicit value from 0 to 255.
+I appended an **8-bit `hops` field** after the existing 16-bit `proto_id` and
+16-bit `dst_id`. One byte permits values from 0 to 255, adds only one byte per
+tunnel packet, and leaves the old fields at their original offsets. The sender
+defaults to **4** and accepts `--hops 0..255`. Four allows the normal two-switch
+path to reach a host with 2 left, while limiting a loop to a few passes.
 
-Every upgraded switch checks `hops` before the tunnel table. At zero it drops
-the packet; otherwise it subtracts one and applies `myTunnel_exact`. Checking
-first prevents an 8-bit underflow from turning 0 into 255. The parser extracts
-the longer header and the deparser emits it, while Scapy in `send.py` and
-`receive.py` uses the same field order and width. A two-switch delivery should
-therefore arrive with `hops=2`. A loop starting at 4 should be processed by
-five upgraded switches: four forwards, then a drop at the fifth.
+On each upgraded switch, ingress first checks a valid tunnel header. If `hops`
+is zero, it drops the packet. Otherwise it subtracts one and then looks up
+`dst_id` in `myTunnel_exact`. Checking before subtraction prevents zero from
+wrapping to 255. The parser and deparser handle the five-byte header, and both
+Scapy host programs use that same field order and size. With a starting value
+of 4, two upgraded switches should each forward twice; the fifth switch visit
+should drop the packet (s1: three visits, s2: two).
 
 ## 3. Implementation
 
-<!-- Summarise what you changed in tunnel.p4, send.py and receive.py. The pull request shows
-     the code itself: here, explain anything a reviewer might not see from the diff alone. -->
+`tunnel.p4` declares `bit<8> hops` and adds the zero check and decrement in the
+tunnel ingress branch. The tunnel table still forwards by `dst_id`, and the
+plain IPv4 branch remains separate. `send.py` adds the byte to its Scapy
+`MyTunnel` header, sets a default of 4, and rejects an out-of-range `--hops`
+or `--hops` without `--tunnel`. `receive.py` parses the longer header and
+prints the arriving hop value. `tunnel_v1.p4` retains the complete Step 5
+program for the comparison, and `scripts/collect_evidence.sh` records each
+experiment in the course container.
 
 ## 4. Evidence: it works
 
-<!-- Show, with your evidence files:
-     - tunnelled delivery to h2 and h3, and the hop limit the receivers saw (delivery.txt);
-     - plain IPv4 still works (delivery.txt);
-     - the same loop as in section 1 now ends, and after how many passes — does that match
-       your design? (loop-after.txt) -->
+[delivery.txt](evidence/delivery.txt) shows h2 receiving payload `to h2` with
+`dst_id=2, hops=2`, although its inner IP destination is h3 (`10.40.0.3`).
+It also shows h3 receiving `to h3` with `dst_id=3, hops=2`, although its inner
+IP destination is h2 (`10.40.0.2`). Thus both tunnel exits use the tunnel
+table, and both switches decremented once. A plain h1-to-h3 ping returned
+**2/2 replies**, with reply TTL 62.
+
+In a fresh network, I repeated the same exit-3 table change and sent one
+packet with `--hops 4`. [loop-after.txt](evidence/loop-after.txt) records s1
+**6→9** and s2 **6→8**: five additional switch visits total. The final s1
+log says `hdr.myTunnel.hops == 0` and runs `MyIngress.drop`. That is the
+predicted four forwards followed by a drop; the counters did not grow during
+the five-second observation window.
 
 ## 5. Evaluation
 
@@ -56,29 +78,80 @@ UDP packet. In the loop, upgraded s1 decrements once per visit while old s2
 does not; starting at 4 should take nine switch processings before s1 drops
 the packet at zero, rather than five with two upgraded switches.
 
-<!-- a) The mixed rollout (mixed.txt): what did you predict before running s1 with your new
-        program and s2 with tunnel_v1.p4? What actually happened to delivery, and to the loop?
-        Explain every difference from your prediction, byte by byte if you need to.
-     b) Propose a safe way to roll out a header change across a network of switches that can't
-        all be upgraded at once. Compare at least two options (for example a version field, a
-        new EtherType, or ordering fields so old switches still parse them).
-     c) Loop protection in the data plane (this hop limit) versus the control plane (Week 3's
-        check_paths()): what can each catch that the other can't? Why do real networks use both?
-     d) What would this change cost on a hardware switch running at line rate? -->
+**What happened.** [mixed.txt](evidence/mixed.txt) shows that h2 *did* print
+the `mixed` UDP payload with `hops=3` and inner TTL 64. The first four tunnel
+bytes, `08 00 00 02`, retain their old positions; old s2 therefore hits the
+exit-2 table entry. Its four-byte parser then treats the fifth byte (`03`,
+after s1's decrement) as the start of IPv4, followed by the first 19 real
+IPv4 bytes. `tcpdump` on h2 shows `08 00 00 02 03 45 ...`, so the five-byte
+tunnel header and real `45` IPv4 start were still emitted intact.
+
+The successful delivery is a coincidence of these packet values, not a safe
+compatibility guarantee. For this packet, the destination IP ends in `03`,
+the same value as the misread starting `hops` byte. Old s2's falsely aligned
+20-byte IPv4 header is therefore the real header rotated by one byte. Its
+false checksum field contains `11 66` (the real UDP protocol byte and first
+checksum byte). Recomputing the checksum on those falsely aligned bytes also
+gives `0x1166`, so s2 does not change them. If the incoming hop byte were
+`04` instead, the calculation would give `0x1066`, changing the real IP
+protocol byte from `0x11` (UDP) to `0x10`. The observed success must not be
+used to assume that old switches can safely parse this new format.
+
+For the mixed loop, [mixed.txt](evidence/mixed.txt) records s1 **10→15** and
+s2 **9→13**: nine visits total. s1 logs its zero-hop drop. The loop ended as
+predicted, but needed four more visits than the all-upgraded case because s2
+did not decrement. A loop entirely among old switches would have no such
+protection.
+
+**Rollout.** One option is to assign a new `proto_id` value to the new tunnel
+format, while retaining `dst_id` at its old offset. In this particular old
+program, s2 would then select `accept` instead of `parse_ipv4`; it could
+forward by `dst_id` while leaving the rest of the packet opaque. Upgrade
+switches to understand both formats, test this pass-through behavior on the
+target, then enable the new format at senders. This keeps traffic moving but
+old switches still do not enforce `hops`, so paths need an upgraded guard and
+the control plane must reject old-only loops. A second option is a **new
+EtherType** for version 2: old switches drop the unknown type instead of
+silently misparsing it. Install dual-format support across each entire path
+before senders emit version 2. This fails closed and is easier to reason
+about, but requires coordinated path upgrades or temporarily blocks traffic.
+Simply appending the byte under the old identifiers, as this experiment did,
+is unsafe.
+
+Week 3's `check_paths()` follows configured routes for every host pair before
+building the network. It can find a repeated router or missing route and
+reject that configuration before any packet is sent; this is more informative
+than a packet drop and can reveal a path that no test packet has tried. It
+only knows the route specification it inspected, however. It cannot stop a
+loop caused later by a changed live table entry, stale device state, or a
+packet taking an unexpected tunnel path. The data-plane hop check acts on
+each actual tunnel packet and bounds those runtime loops, but only after some
+forwards have happened; it does not explain or repair the bad route. Real
+networks use both preflight control-plane checks and per-packet limits.
+
+On hardware, the cost is one header byte per tunnelled packet (sometimes
+absorbed by Ethernet minimum-frame padding), one extra parser extraction,
+an 8-bit zero comparison and decrement, a conditional drop decision, and
+emitting the byte. At line rate these must fit the target's parser and match
+action pipeline resources; if no stage or ALU capacity remains, the program
+may need a different layout or fail to compile for that chip. The added
+header slightly reduces useful payload capacity and could push a packet over
+an MTU. It does not change the inner IPv4 checksum when parsed correctly.
 
 ## AI use
 
-I used OpenAI Codex to read the assignment, design and implement the P4 and
-Scapy changes, write packet tests, run the course image in GitHub Actions,
-interpret the resulting switch and host logs, and help draft this report and
-the pull request. The evidence files identify the commands and observations;
-I will review the implementation and should be able to explain and defend it.
+I used **OpenAI Codex** to read the Week 5 instructions, help design and
+implement the P4 and Scapy changes, write packet tests, run the course image
+through GitHub Actions, inspect the Mininet and packet-capture evidence, and
+draft this report and the pull request. The committed pre-experiment
+prediction and the four evidence files distinguish the prediction from the
+observed results.
 
 ## Evidence files
 
-| File | What it shows |
-|---|---|
-| `evidence/loop-before.txt` | The loop with your finished lab program: pass counts growing |
-| `evidence/delivery.txt` | Tunnelled delivery with the hop limit, and a plain ping |
-| `evidence/loop-after.txt` | The same loop with your hop limit: pass counts that stop |
-| `evidence/mixed.txt` | The mixed rollout: s1 new, s2 old |
+| File | Observation |
+| --- | --- |
+| [loop-before.txt](evidence/loop-before.txt) | Old program's continuing tunnel loop |
+| [delivery.txt](evidence/delivery.txt) | Both tunnel exits and plain IPv4 ping |
+| [loop-after.txt](evidence/loop-after.txt) | Five visits and zero-hop drop |
+| [mixed.txt](evidence/mixed.txt) | Old s2's parsing, packet bytes, and nine-visit loop |

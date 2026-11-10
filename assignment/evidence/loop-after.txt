@@ -1,0 +1,153 @@
+Both switches run the new program. The same exit-3 loop uses a starting hop limit of 4.
+*** Compiling tunnel.p4
+*** Error setting resource limits. Mininet's performance may be affected.
+*** Configuring hosts
+h1 h2 h3 
+*** Starting controller
+
+*** Starting 2 switches
+s1 s2 
+*** s1: 6 table entries added
+*** s2: 6 table entries added
+*** Your hosts: h1 10.40.0.1, h2 10.40.0.2, h3 10.40.0.3
+*** Ready. Switch logs: logs/s1.txt, logs/s2.txt. What h2 and h3 receive: logs/h2.txt, logs/h3.txt
+*** Starting CLI:
+mininet> Done
+==========
+TABLE ENTRIES
+**********
+Dumping entry 0x0
+Match key:
+* myTunnel.dst_id     : EXACT     0001
+Action entry: MyIngress.myTunnel_forward - 01
+**********
+Dumping entry 0x1
+Match key:
+* myTunnel.dst_id     : EXACT     0002
+Action entry: MyIngress.myTunnel_forward - 02
+**********
+Dumping entry 0x2
+Match key:
+* myTunnel.dst_id     : EXACT     0003
+Action entry: MyIngress.myTunnel_forward - 03
+==========
+Dumping default entry
+Action entry: MyIngress.drop - 
+==========
+mininet> Done
+Modifying entry 2 for exact match table MyIngress.myTunnel_exact
+mininet> == s2 tunnel table after change ==
+mininet> Done
+==========
+TABLE ENTRIES
+**********
+Dumping entry 0x0
+Match key:
+* myTunnel.dst_id     : EXACT     0001
+Action entry: MyIngress.myTunnel_forward - 01
+**********
+Dumping entry 0x1
+Match key:
+* myTunnel.dst_id     : EXACT     0002
+Action entry: MyIngress.myTunnel_forward - 02
+**********
+Dumping entry 0x2
+Match key:
+* myTunnel.dst_id     : EXACT     0003
+Action entry: MyIngress.myTunnel_forward - 01
+==========
+Dumping default entry
+Action entry: MyIngress.drop - 
+==========
+mininet> == switch receive counts before loop packet ==
+mininet> logs/s1.txt:6
+logs/s2.txt:6
+mininet> ###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 3
+     hops      = 4
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 35
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6676
+        src       = 10.40.0.1
+        dst       = 10.40.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 15
+           chksum    = 0x2977
+###[ Raw ]### 
+              load      = 'bounded'
+
+Sent from h1-eth0.
+mininet> mininet> == switch receive counts after 5 seconds ==
+mininet> logs/s1.txt:9
+logs/s2.txt:8
+mininet> == end of s1 switch log ==
+mininet> * hdr.myTunnel.dst_id : EXACT     0003
+Action entry: MyIngress.myTunnel_forward - 2,
+
+[06:50:08.673] [bmv2] [D] [thread 69] [1.0] [cxt 0] Action entry is MyIngress.myTunnel_forward - 2,
+[06:50:08.673] [bmv2] [T] [thread 69] [1.0] [cxt 0] Action MyIngress.myTunnel_forward
+[06:50:08.673] [bmv2] [T] [thread 69] [1.0] [cxt 0] tunnel.p4(113) Primitive standard_metadata.egress_spec = port
+[06:50:08.673] [bmv2] [D] [thread 69] [1.0] [cxt 0] Pipeline 'ingress': end
+[06:50:08.673] [bmv2] [D] [thread 69] [1.0] [cxt 0] Egress port is 2
+[06:50:08.673] [bmv2] [D] [thread 72] [1.0] [cxt 0] Pipeline 'egress': start
+[06:50:08.674] [bmv2] [D] [thread 72] [1.0] [cxt 0] Pipeline 'egress': end
+[06:50:08.674] [bmv2] [D] [thread 72] [1.0] [cxt 0] Deparser 'deparser': start
+[06:50:08.674] [bmv2] [D] [thread 72] [1.0] [cxt 0] Updating checksum 'cksum'
+[06:50:08.674] [bmv2] [D] [thread 72] [1.0] [cxt 0] Deparsing header 'ethernet'
+[06:50:08.674] [bmv2] [D] [thread 72] [1.0] [cxt 0] Deparsing header 'myTunnel'
+[06:50:08.674] [bmv2] [D] [thread 72] [1.0] [cxt 0] Deparsing header 'ipv4'
+[06:50:08.674] [bmv2] [D] [thread 72] [1.0] [cxt 0] Deparser 'deparser': end
+[06:50:08.674] [bmv2] [D] [thread 74] [1.0] [cxt 0] Transmitting packet of size 54 out of port 2
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Processing packet received on port 2
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser 'parser': start
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser 'parser' entering state 'start'
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Extracting header 'ethernet'
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser state 'start': key is 1212
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] Bytes parsed: 14
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser 'parser' entering state 'parse_myTunnel'
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Extracting header 'myTunnel'
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser state 'parse_myTunnel': key is 0800
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] Bytes parsed: 19
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser 'parser' entering state 'parse_ipv4'
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Extracting header 'ipv4'
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser state 'parse_ipv4' has no switch, going to default next state
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] Bytes parsed: 39
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Parser 'parser': end
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Pipeline 'ingress': start
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] tunnel.p4(124) Condition "hdr.myTunnel.isValid()" (node_2) is true
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] tunnel.p4(125) Condition "hdr.myTunnel.hops == 0" (node_3) is true
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] Applying table 'tbl_drop'
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Looking up key:
+
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Table 'tbl_drop': miss
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Action entry is MyIngress.drop - 
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] Action MyIngress.drop
+[06:50:08.674] [bmv2] [T] [thread 69] [2.0] [cxt 0] tunnel.p4(97) Primitive mark_to_drop(standard_metadata)
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Pipeline 'ingress': end
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Egress port is 511
+[06:50:08.674] [bmv2] [D] [thread 69] [2.0] [cxt 0] Dropping packet at the end of ingress
+mininet> *** Stopping 0 controllers
+
+*** Stopping 4 links
+....
+*** Stopping 2 switches
+s1 s2 
+*** Stopping 3 hosts
+h1 h2 h3 
+*** Done
