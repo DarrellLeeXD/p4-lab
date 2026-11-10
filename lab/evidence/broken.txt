@@ -1,0 +1,72 @@
+Week 5 lab phase: broken. Student ID suffix: 4940.
+Step 6: temporary copy with tunnel deparser emission commented out.
+The committed tunnel_v1.p4 retains packet.emit(hdr.myTunnel).
+*** Compiling tunnel.p4
+*** Error setting resource limits. Mininet's performance may be affected.
+*** Configuring hosts
+h1 h2 h3
+*** Starting controller
+
+*** Starting 2 switches
+s1 s2
+*** s1: 6 table entries added
+*** s2: 6 table entries added
+*** Your hosts: h1 10.40.0.1, h2 10.40.0.2, h3 10.40.0.3
+*** Ready. Switch logs: logs/s1.txt, logs/s2.txt. What h2 and h3 receive: logs/h2.txt, logs/h3.txt
+*** Starting CLI:
+mininet> ###[ Ethernet ]###
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]###
+     proto_id  = 2048
+     dst_id    = 2
+###[ IP ]###
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 34
+        id        = 1
+        flags     =
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6677
+        src       = 10.40.0.1
+        dst       = 10.40.0.3
+        \options   \
+###[ UDP ]###
+           sport     = 4321
+           dport     = 4321
+           len       = 14
+           chksum    = 0xc1ae
+###[ Raw ]###
+              load      = 'test 4'
+
+Sent from h1-eth0.
+mininet> mininet> == test 4 host logs ==
+mininet> Listening on h2-eth0...
+Listening on h3-eth0...
+mininet> == s1 parsed and forwarded tunnel ==
+mininet> Action entry: MyIngress.myTunnel_forward - 1,
+Action entry: MyIngress.myTunnel_forward - 2,
+Action entry: MyIngress.myTunnel_forward - 2,
+[07:07:22.451] [bmv2] [D] [thread 75] [1.0] [cxt 0] Parser state 'start': key is 1212
+* hdr.myTunnel.dst_id : 0002
+Action entry: MyIngress.myTunnel_forward - 2,
+[07:07:22.452] [bmv2] [D] [thread 75] [1.0] [cxt 0] Action entry is MyIngress.myTunnel_forward - 2,
+[07:07:22.452] [bmv2] [T] [thread 75] [1.0] [cxt 0] Action MyIngress.myTunnel_forward
+[07:07:22.452] [bmv2] [D] [thread 80] [1.0] [cxt 0] Transmitting packet of size 48 out of port 2
+mininet> == s2 misparsed packet and dropped ==
+mininet> [07:07:22.452] [bmv2] [D] [thread 92] [0.0] [cxt 0] Parser state 'parse_myTunnel': key is 4500
+* hdr.myTunnel.dst_id : 0022
+[07:07:22.452] [bmv2] [T] [thread 92] [0.0] [cxt 0] Action MyIngress.drop
+mininet> *** Stopping 0 controllers
+
+*** Stopping 4 links
+....
+*** Stopping 2 switches
+s1 s2
+*** Stopping 3 hosts
+h1 h2 h3
+*** Done

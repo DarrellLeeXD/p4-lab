@@ -1,0 +1,52 @@
+name: Collect tunnel evidence
+
+on:
+  push:
+    branches: [hop-limit]
+    paths:
+      - assignment/collect.sh
+      - assignment/tunnel.p4
+      - assignment/tunnel_v1.p4
+      - assignment/send.py
+      - assignment/receive.py
+      - assignment/topo.py
+      - assignment/p4cli
+      - assignment/s1-commands.txt
+      - assignment/s2-commands.txt
+      - assignment/legacy/send.py
+      - assignment/legacy/receive.py
+      - assignment/check_evidence.py
+      - .github/workflows/evidence.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run P4 experiments in the course image
+        shell: bash
+        run: |
+          set -euo pipefail
+          for phase in before delivery after mixed; do
+            docker run --rm -i --privileged \
+              -v "$PWD:/work" -w /work \
+              ghcr.io/firdaussahran/p4-lab:1.0 \
+              bash assignment/collect.sh "$phase"
+          done
+          for file in loop-before delivery loop-after mixed; do
+            test -s "assignment/evidence/$file.txt"
+          done
+          python3 assignment/check_evidence.py
+      - name: Upload experiment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-experiments
+          path: assignment/evidence/*.txt
