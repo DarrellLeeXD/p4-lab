@@ -1,0 +1,68 @@
+Week 5 lab phase: parser. Student ID suffix: 4940.
+Step 4: tunnel parser and deparser added; ingress still forwards by IPv4.
+*** Compiling tunnel.p4
+*** Error setting resource limits. Mininet's performance may be affected.
+*** Configuring hosts
+h1 h2 h3
+*** Starting controller
+
+*** Starting 2 switches
+s1 s2
+*** s1: MyIngress.myTunnel_exact isn't used by the program (yet), so its entries were skipped
+*** s1: 3 table entries added
+*** s2: MyIngress.myTunnel_exact isn't used by the program (yet), so its entries were skipped
+*** s2: 3 table entries added
+*** Your hosts: h1 10.40.0.1, h2 10.40.0.2, h3 10.40.0.3
+*** Ready. Switch logs: logs/s1.txt, logs/s2.txt. What h2 and h3 receive: logs/h2.txt, logs/h3.txt
+*** Starting CLI:
+tunnel.p4(115): [--Wwarn=unused] warning: table 'myTunnel_exact' is unused
+    table myTunnel_exact {
+          ^^^^^^^^^^^^^^
+tunnel.p4(115): [--Winfo=removed] info: removing table 'myTunnel_exact'
+    table myTunnel_exact {
+          ^^^^^^^^^^^^^^
+mininet> ###[ Ethernet ]###
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]###
+     proto_id  = 2048
+     dst_id    = 2
+###[ IP ]###
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 34
+        id        = 1
+        flags     =
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6677
+        src       = 10.40.0.1
+        dst       = 10.40.0.3
+        \options   \
+###[ UDP ]###
+           sport     = 4321
+           dport     = 4321
+           len       = 14
+           chksum    = 0xc1b0
+###[ Raw ]###
+              load      = 'test 2'
+
+Sent from h1-eth0.
+mininet> mininet> == test 2 host logs ==
+mininet> Listening on h2-eth0...
+Listening on h3-eth0...
+Received (tunnelled, dst_id=2) from 10.40.0.1 to 10.40.0.3, TTL 62: 'test 2'
+mininet> == s1 IPv4 table application ==
+mininet> [07:07:16.241] [bmv2] [T] [thread 74] [0.0] [cxt 0] Applying table 'MyIngress.ipv4_lpm'
+mininet> *** Stopping 0 controllers
+
+*** Stopping 4 links
+....
+*** Stopping 2 switches
+s1 s2
+*** Stopping 3 hosts
+h1 h2 h3
+*** Done

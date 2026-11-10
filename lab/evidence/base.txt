@@ -1,0 +1,142 @@
+Week 5 lab phase: base. Student ID suffix: 4940.
+Original template program: Step 1 start, Step 2 IPv4, Step 3 live table edits.
+*** Compiling tunnel.p4
+*** Error setting resource limits. Mininet's performance may be affected.
+*** Configuring hosts
+h1 h2 h3
+*** Starting controller
+
+*** Starting 2 switches
+s1 s2
+*** s1: MyIngress.myTunnel_exact isn't used by the program (yet), so its entries were skipped
+*** s1: 3 table entries added
+*** s2: MyIngress.myTunnel_exact isn't used by the program (yet), so its entries were skipped
+*** s2: 3 table entries added
+*** Your hosts: h1 10.40.0.1, h2 10.40.0.2, h3 10.40.0.3
+*** Ready. Switch logs: logs/s1.txt, logs/s2.txt. What h2 and h3 receive: logs/h2.txt, logs/h3.txt
+*** Starting CLI:
+tunnel.p4(11): [--Wwarn=unused] warning: 'TYPE_MYTUNNEL' is unused
+const bit<16> TYPE_MYTUNNEL = 0x1212;
+              ^^^^^^^^^^^^^
+tunnel.p4(109): [--Wwarn=unused] warning: table 'myTunnel_exact' is unused
+    table myTunnel_exact {
+          ^^^^^^^^^^^^^^
+tunnel.p4(109): [--Winfo=removed] info: removing table 'myTunnel_exact'
+    table myTunnel_exact {
+          ^^^^^^^^^^^^^^
+mininet> == Step 2: IPv4 pings ==
+mininet> PING 10.40.0.2 (10.40.0.2) 56(84) bytes of data.
+64 bytes from 10.40.0.2: icmp_seq=1 ttl=62 time=2.49 ms
+64 bytes from 10.40.0.2: icmp_seq=2 ttl=62 time=1.84 ms
+64 bytes from 10.40.0.2: icmp_seq=3 ttl=62 time=1.77 ms
+
+--- 10.40.0.2 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 1.772/2.032/2.485/0.321 ms
+mininet> PING 10.40.0.3 (10.40.0.3) 56(84) bytes of data.
+64 bytes from 10.40.0.3: icmp_seq=1 ttl=62 time=1.54 ms
+64 bytes from 10.40.0.3: icmp_seq=2 ttl=62 time=1.81 ms
+64 bytes from 10.40.0.3: icmp_seq=3 ttl=62 time=1.80 ms
+
+--- 10.40.0.3 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2004ms
+rtt min/avg/max/mdev = 1.536/1.714/1.811/0.126 ms
+mininet> == s1 IPv4 table applications ==
+mininet> [07:07:06.190] [bmv2] [T] [thread 75] [0.0] [cxt 0] Applying table 'MyIngress.ipv4_lpm'
+[07:07:06.192] [bmv2] [T] [thread 75] [1.0] [cxt 0] Applying table 'MyIngress.ipv4_lpm'
+[07:07:07.191] [bmv2] [T] [thread 75] [2.0] [cxt 0] Applying table 'MyIngress.ipv4_lpm'
+[07:07:07.192] [bmv2] [T] [thread 75] [3.0] [cxt 0] Applying table 'MyIngress.ipv4_lpm'
+mininet> == Step 3: s2 IPv4 table before deletion ==
+mininet> Done
+==========
+TABLE ENTRIES
+**********
+Dumping entry 0x0
+Match key:
+* ipv4.dstAddr        : LPM       0a280001/32
+Action entry: MyIngress.ipv4_forward - 01
+**********
+Dumping entry 0x1
+Match key:
+* ipv4.dstAddr        : LPM       0a280002/32
+Action entry: MyIngress.ipv4_forward - 02
+**********
+Dumping entry 0x2
+Match key:
+* ipv4.dstAddr        : LPM       0a280003/32
+Action entry: MyIngress.ipv4_forward - 03
+==========
+Dumping default entry
+Action entry: MyIngress.drop -
+==========
+mininet> Done
+Deleting entry 2 from MyIngress.ipv4_lpm
+mininet> == h3 ping with route deleted ==
+mininet> PING 10.40.0.3 (10.40.0.3) 56(84) bytes of data.
+
+--- 10.40.0.3 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1029ms
+
+mininet> == s2 default drop after miss ==
+mininet> [07:07:10.314] [bmv2] [D] [thread 92] [12.0] [cxt 0] Table 'MyIngress.ipv4_lpm': miss
+[07:07:10.314] [bmv2] [T] [thread 92] [12.0] [cxt 0] Action MyIngress.drop
+[07:07:11.343] [bmv2] [D] [thread 92] [13.0] [cxt 0] Table 'MyIngress.ipv4_lpm': miss
+[07:07:11.343] [bmv2] [T] [thread 92] [13.0] [cxt 0] Action MyIngress.drop
+mininet> Done
+Adding entry to lpm match table MyIngress.ipv4_lpm
+match key:           LPM-0a:28:00:03/32
+action:              MyIngress.ipv4_forward
+runtime data:        00:03
+Entry has been added with handle 16777218
+mininet> == h3 ping after restoring route ==
+mininet> PING 10.40.0.3 (10.40.0.3) 56(84) bytes of data.
+64 bytes from 10.40.0.3: icmp_seq=1 ttl=62 time=1.43 ms
+64 bytes from 10.40.0.3: icmp_seq=2 ttl=62 time=1.57 ms
+
+--- 10.40.0.3 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms
+rtt min/avg/max/mdev = 1.428/1.497/1.567/0.069 ms
+mininet> ###[ Ethernet ]###
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]###
+     proto_id  = 2048
+     dst_id    = 2
+###[ IP ]###
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 34
+        id        = 1
+        flags     =
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6677
+        src       = 10.40.0.1
+        dst       = 10.40.0.3
+        \options   \
+###[ UDP ]###
+           sport     = 4321
+           dport     = 4321
+           len       = 14
+           chksum    = 0xc1b1
+###[ Raw ]###
+              load      = 'test 1'
+
+Sent from h1-eth0.
+mininet> mininet> == test 1 host logs ==
+mininet> Listening on h2-eth0...
+Listening on h3-eth0...
+mininet> == s1 unrecognized tunnel EtherType ==
+mininet> [07:07:13.626] [bmv2] [D] [thread 75] [18.0] [cxt 0] Parser state 'start': key is 1212
+mininet> *** Stopping 0 controllers
+
+*** Stopping 4 links
+....
+*** Stopping 2 switches
+s1 s2
+*** Stopping 3 hosts
+h1 h2 h3
+*** Done
