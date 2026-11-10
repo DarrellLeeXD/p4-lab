@@ -1,0 +1,35 @@
+name: Collect tunnel evidence
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run P4 network in the course image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --privileged \
+            -v "$PWD:/work" -w /work \
+            ghcr.io/firdaussahran/p4-lab:1.0 \
+            python3 topo.py --id 4940 <<'MININET' 2>&1 | tee assignment/evidence/probe.txt
+          sh ./p4cli s2 table_dump MyIngress.myTunnel_exact
+          sh sleep 1
+          h1 python3 send.py 10.40.0.3 "probe" --tunnel 2
+          sh sleep 1; cat logs/h2.txt logs/h3.txt
+          h1 ping -c 2 h3
+          exit
+          MININET
+      - name: Upload probe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-probe
+          path: assignment/evidence/probe.txt
