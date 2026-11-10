@@ -3,6 +3,9 @@ name: Collect tunnel evidence
 on:
   push:
     branches: [hop-limit]
+    paths:
+      - scripts/collect_evidence.sh
+      - .github/workflows/evidence.yml
   workflow_dispatch:
 
 permissions:
@@ -14,24 +17,24 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Run P4 network in the course image
+        with:
+          fetch-depth: 0
+      - name: Run P4 experiments in the course image
         shell: bash
         run: |
           set -euo pipefail
-          docker run --rm -i --privileged \
-            -v "$PWD:/work" -w /work \
-            ghcr.io/firdaussahran/p4-lab:1.0 \
-            python3 topo.py --id 4940 <<'MININET' 2>&1 | tee assignment/evidence/probe.txt
-          sh ./p4cli s2 table_dump MyIngress.myTunnel_exact
-          sh sleep 1
-          h1 python3 send.py 10.40.0.3 "probe" --tunnel 2
-          sh sleep 1; cat logs/h2.txt logs/h3.txt
-          h1 ping -c 2 h3
-          exit
-          MININET
-      - name: Upload probe
+          for phase in before delivery after mixed; do
+            docker run --rm -i --privileged \
+              -v "$PWD:/work" -w /work \
+              ghcr.io/firdaussahran/p4-lab:1.0 \
+              bash scripts/collect_evidence.sh "$phase"
+          done
+          for file in loop-before delivery loop-after mixed; do
+            test -s "assignment/evidence/$file.txt"
+          done
+      - name: Upload experiment evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: p4-probe
-          path: assignment/evidence/probe.txt
+          name: p4-experiments
+          path: assignment/evidence/*.txt
