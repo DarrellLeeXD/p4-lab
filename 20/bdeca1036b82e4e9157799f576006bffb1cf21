@@ -1,0 +1,19 @@
+tunnel_v1.p4
+  s_a7d03123c25ce9::t_179918dcec3bd1 1-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "20bdeca1036b82e4e9157799f576006bffb1cf21",
+  "prompts": {},
+  "sessions": {
+    "s_a7d03123c25ce9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "unknown"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    }
+  }
+}
