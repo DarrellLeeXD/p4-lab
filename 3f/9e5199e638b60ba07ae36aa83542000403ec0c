@@ -1,0 +1,27 @@
+send.py
+  s_3ea27f9d4012d4::t_32c2ec7fae2e4e 5,9,14,21,26-38,43
+.gitignore
+  s_3ea27f9d4012d4::t_087df0aae58e29 4-5
+tests/test_packets.py
+  s_3ea27f9d4012d4::t_a4ad178c36c901 1-45
+receive.py
+  s_3ea27f9d4012d4::t_32c2ec7fae2e4e 3,8,17-18,23-30
+tunnel.p4
+  s_3ea27f9d4012d4::t_3ef1e843b0d41a 28,125-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "3f9e5199e638b60ba07ae36aa83542000403ec0c",
+  "prompts": {},
+  "sessions": {
+    "s_3ea27f9d4012d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14296-f230-7d41-bb92-ba25b2d7e091",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "darrell.lee <darrell.lee@galactic-horizons.com>"
+    }
+  }
+}
